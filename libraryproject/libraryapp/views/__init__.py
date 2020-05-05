@@ -3,6 +3,7 @@ from .books.details import book_details
 from .books.form import book_form
 
 from .librarians.list import librarian_list
+from .librarians.details import librarian_details
 
 from .libraries.list import library_list
 from .libraries.details import library_details
