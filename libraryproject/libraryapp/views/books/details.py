@@ -38,3 +38,46 @@ def book_details(request, book_id):
         }
 
         return render(request, template, context)
+    
+    elif request.method == 'POST':
+        form_data = request.POST
+
+        # Check if this POST is for editing a book
+        if (
+            "actual_method" in form_data
+            and form_data["actual_method"] == "PUT"
+        ):
+            with sqlite3.connect(Connection.db_path) as conn:
+                db_cursor = conn.cursor()
+
+                db_cursor.execute("""
+                UPDATE libraryapp_book
+                SET title = ?,
+                    author = ?,
+                    isbn = ?,
+                    year_published = ?,
+                    location_id = ?
+                WHERE id = ?
+                """,
+                (
+                    form_data['title'], form_data['author'],
+                    form_data['isbn'], form_data['year_published'],
+                    form_data["location"], book_id,
+                ))
+
+            return redirect(reverse('libraryapp:books'))
+    
+        # Check if this POST is for deleting a book
+        if (
+            "actual_method" in form_data
+            and form_data["actual_method"] == "DELETE"
+        ):
+            with sqlite3.connect(Connection.db_path) as conn:
+                db_cursor = conn.cursor()
+
+                db_cursor.execute("""
+                DELETE FROM libraryapp_book
+                WHERE id = ?
+                """, (book_id,))
+
+            return redirect(reverse('libraryapp:books'))
