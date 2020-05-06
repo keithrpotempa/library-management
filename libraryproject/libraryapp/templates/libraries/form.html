@@ -1,11 +1,7 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Bangazon</title>
-  </head>
-  <body>
+{% extends 'shared/base.html' %}
+
+{% block content %}
+
     <h1>Add Library</h1>
 
 
@@ -21,5 +17,5 @@
       </fieldset>
       <input type="submit" value="Add It" />
     </form>
-  </body>
-</html>
+
+{% endblock %}

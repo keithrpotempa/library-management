@@ -7,11 +7,11 @@ class Library (models.Model):
     address = models.CharField(max_length=50)
     
     class Meta:
-        verbose_name = ("library ")
+        verbose_name = ("library")
         verbose_name_plural = ("libraries")
         
     def __str__(self):
-        return self.name
+        return self.title
       
     def get_absolute_url(self):
         return reverse("library _detail", kwargs={"pk": self.pk})
