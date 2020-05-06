@@ -28,9 +28,7 @@ def library_list(request):
 
             libraries = db_cursor.fetchall()
             print("libraries", libraries)
-
-            # FIXME: PRETTY SURE THIS BIT FROM THE CHAPTER IS JUST WRONG...
-            
+                        
             # Start with an empty dictionary
             library_groups = {}
 
