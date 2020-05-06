@@ -29,7 +29,7 @@ def library_list(request):
             libraries = db_cursor.fetchall()
             print("libraries", libraries)
 
-            # PRETTY SURE THIS BIT FROM THE CHAPTER IS JUST WRONG...
+            # FIXME: PRETTY SURE THIS BIT FROM THE CHAPTER IS JUST WRONG...
             
             # Start with an empty dictionary
             library_groups = {}
@@ -48,11 +48,10 @@ def library_list(request):
                 # book to the list of books for the current library
                 else:
                     library_groups[library.id].books.append(book)
-                print("library_groups", library_groups)
 
         template = 'libraries/list.html'
         context = {
-            'all_libraries': library_groups
+            'all_libraries': library_groups.values()
         }
 
         return render(request, template, context)
