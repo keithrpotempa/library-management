@@ -1,6 +1,7 @@
 import sqlite3
 from django.urls import reverse
 from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from libraryapp.models import Librarian
 from libraryapp.models import model_factory
@@ -8,24 +9,33 @@ from ..connection import Connection
 
 
 def get_librarian(librarian_id):
-    with sqlite3.connect(Connection.db_path) as conn:
-        conn.row_factory = model_factory(Librarian)
-        db_cursor = conn.cursor()
+    # # SQL METHOD
+    # with sqlite3.connect(Connection.db_path) as conn:
+    #     conn.row_factory = model_factory(Librarian)
+    #     db_cursor = conn.cursor()
 
-        db_cursor.execute("""
-        SELECT
-              l.id,
-              l.location_id,
-              l.user_id,
-              u.first_name,
-              u.last_name,
-              u.email
-        FROM libraryapp_librarian l
-        JOIN auth_user u on l.user_id = u.id
-        WHERE l.id = ?
-        """, (librarian_id,))
+    #     db_cursor.execute("""
+    #     SELECT
+    #           l.id,
+    #           l.location_id,
+    #           l.user_id,
+    #           u.first_name,
+    #           u.last_name,
+    #           u.email
+    #     FROM libraryapp_librarian l
+    #     JOIN auth_user u on l.user_id = u.id
+    #     WHERE l.id = ?
+    #     """, (librarian_id,))
 
-        return db_cursor.fetchone()
+    #     return db_cursor.fetchone()
+    
+    librarian = Librarian.objects.get(pk=librarian_id)
+    user = User.objects.get(pk=librarian.user_id)
+    librarian.first_name = user.first_name
+    librarian.last_name = user.last_name
+    librarian.email = user.email
+    return librarian
+
 
 @login_required
 def librarian_details(request, librarian_id):
