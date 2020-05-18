@@ -8,48 +8,56 @@ from ..connection import Connection
 @login_required
 def library_list(request):
     if request.method == 'GET':
-        with sqlite3.connect(Connection.db_path) as conn:
-            conn.row_factory = create_library
-            db_cursor = conn.cursor()
+        ## SQL METHOD
+        # with sqlite3.connect(Connection.db_path) as conn:
+        #     conn.row_factory = create_library
+        #     db_cursor = conn.cursor()
 
-            db_cursor.execute("""
-                SELECT
-                    li.id,
-                    li.title,
-                    li.address,
-                    b.id book_id,
-                    b.title book_title,
-                    b.author,
-                    b.year_published,
-                    b.isbn
-                FROM libraryapp_library li
-                JOIN libraryapp_book b ON li.id = b.location_id
-            """)
+        #     db_cursor.execute("""
+        #         SELECT
+        #             li.id,
+        #             li.title,
+        #             li.address,
+        #             b.id book_id,
+        #             b.title book_title,
+        #             b.author,
+        #             b.year_published,
+        #             b.isbn
+        #         FROM libraryapp_library li
+        #         JOIN libraryapp_book b ON li.id = b.location_id
+        #     """)
 
-            libraries = db_cursor.fetchall()
-            print("libraries", libraries)
-                        
-            # Start with an empty dictionary
-            library_groups = {}
+        #     libraries = db_cursor.fetchall()
+        
+        ## ORM METHOD
+        libraries = Library.objects.all()
+        
+        for library in libraries:
+            library.books = Book.objects.filter(location_id=library.id)
 
-            # Iterate the list of tuples
-            for library, book in libraries:
+            # # SQL METHOD   
+            # # Start with an empty dictionary
+            # library_groups = {}
 
-                # If the dictionary does have a key of the current
-                # library's `id` value, add the key and set the value
-                # to the current library
-                if library.id not in library_groups:
-                    library_groups[library.id] = library
-                    library_groups[library.id].books.append(book)
+            # # Iterate the list of tuples
+            # for library, book in libraries:
 
-                # If the key does exist, just append the current
-                # book to the list of books for the current library
-                else:
-                    library_groups[library.id].books.append(book)
+            #     # If the dictionary does have a key of the current
+            #     # library's `id` value, add the key and set the value
+            #     # to the current library
+            #     if library.id not in library_groups:
+            #         library_groups[library.id] = library
+            #         library_groups[library.id].books.append(book)
+
+            #     # If the key does exist, just append the current
+            #     # book to the list of books for the current library
+            #     else:
+            #         library_groups[library.id].books.append(book)
 
         template = 'libraries/list.html'
         context = {
-            'all_libraries': library_groups.values()
+            # 'all_libraries': library_groups.values()
+            'all_libraries': libraries
         }
 
         return render(request, template, context)
@@ -57,40 +65,49 @@ def library_list(request):
     elif request.method == 'POST':
         form_data = request.POST
 
-        with sqlite3.connect(Connection.db_path) as conn:
-            db_cursor = conn.cursor()
+        # # SQL METHOD
+        # with sqlite3.connect(Connection.db_path) as conn:
+        #     db_cursor = conn.cursor()
 
-            db_cursor.execute("""
-            INSERT INTO libraryapp_library
-            (
-                title, address
-            )
-            VALUES (?, ?)
-            """,
-            (form_data['title'], form_data['address']))
+        #     db_cursor.execute("""
+        #     INSERT INTO libraryapp_library
+        #     (
+        #         title, address
+        #     )
+        #     VALUES (?, ?)
+        #     """,
+        #     (form_data['title'], form_data['address']))
+        
+        # # ORM METHOD
+        new_library = Library(
+            title =  form_data['title'], 
+            address = form_data['address']
+        )
+        new_library.save()
 
         return redirect(reverse('libraryapp:libraries'))
-    
-def create_library(cursor, row):
-    _row = sqlite3.Row(cursor, row)
 
-    library = Library()
-    library.id = _row["id"]
-    library.title = _row["title"]
-    library.address = _row["address"]
+## SQL METHOD    
+# def create_library(cursor, row):
+#     _row = sqlite3.Row(cursor, row)
 
-    # Note: You are adding a blank books list to the library object
-    # This list will be populated later (see below)
-    library.books = []
+#     library = Library()
+#     library.id = _row["id"]
+#     library.title = _row["title"]
+#     library.address = _row["address"]
 
-    book = Book()
-    book.id = _row["book_id"]
-    book.title = _row["book_title"]
-    book.author = _row["author"]
-    book.isbn = _row["isbn"]
-    book.year_published = _row["year_published"]
+#     # Note: You are adding a blank books list to the library object
+#     # This list will be populated later (see below)
+#     library.books = []
 
-    # Return a tuple containing the library and the
-    # book built from the data in the current row of
-    # the data set
-    return (library, book,)
+#     book = Book()
+#     book.id = _row["book_id"]
+#     book.title = _row["book_title"]
+#     book.author = _row["author"]
+#     book.isbn = _row["isbn"]
+#     book.year_published = _row["year_published"]
+
+#     # Return a tuple containing the library and the
+#     # book built from the data in the current row of
+#     # the data set
+#     return (library, book,)
